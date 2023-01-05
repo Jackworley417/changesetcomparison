@@ -23,38 +23,20 @@ canvas.grid(columnspan=3, rowspan=3)
 Website1_var = tk.StringVar()
 Website2_var = tk.StringVar()
 
-'''
-def User_entry(*args):
-    return(Website1.get()) 
-
-
-def User_entry2(*args):
-    return(Website2.get())
-'''
-
-def submit():
-    global url1, url2
-    url1=Website1_var.get()
-    url2=Website2_var.get()
-    Website1_var.set("")
-    Website2_var.set("")
-    return url1, url2
-
 
 #Entry boxes for filling in the websites where the changesets are stored
 #Labels and text directing the user to the correct spot
 label1 = tk.Label(root, text="Please Enter First Website:", font=('helvetica', 10, 'normal'))
-Website1 = tk.Entry(root, textvariable=Website1_var)
+Website1_var = tk.Entry(root)
 canvas.create_window(100, 25, window=label1)
-canvas.create_window(100, 50, window=Website1)
+canvas.create_window(100, 50, window=Website1_var)
 
 
 #Labels and text directing the user to the correct spot
 label2 = tk.Label(root, text="Please Enter Second Website:", font=('helvetica', 10, 'normal'))
-Website2 = tk.Entry(root, textvariable=Website2_var)
+Website2_var = tk.Entry(root)
 canvas.create_window(100, 75, window=label2)
-canvas.create_window(100, 100, window=Website2)
-
+canvas.create_window(100, 100, window=Website2_var)
 
 #instructions for the GUI
 instruction = tk.Label(root, text="Extracting Changesets from Azure Dev Ops Repo")
@@ -67,39 +49,40 @@ df1 = pd.DataFrame(columns=["Change set", "Name", "Agent", "Time"])
 
 
 # Retrieves the actual changeset number
-def retrieve_changesets_fromwebsite1(url1,df):
-     driver.get=url1
+def retrieve_changesets_fromwebsite1():
+    driver.get=Website1_var.get()
      #assert "Changeset" in driver.title
-     driver.implicitly_wait(30)
-     Changesetnumbers = driver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div/div[2]/div/div/div/div/table/tbody/a[1]/td[2]/div/div[2]/div/div[1]/span")
-     Name = driver.find_element(By.CLASS_NAME,"text-ellipsis  font-weight-semibold flex-grow")
-     Agent = driver.find_element(By.CLASS_NAME,"text-ellipsis")
-     Time = driver.find_element(By.CLASS_NAME,"bolt-time-item white-space-nowrap")
-     Changesetnumbers_list = []
-     for x in Changesetnumbers:
-         Changesetnumbers_list.append(Changesetnumbers[x].text)
+    driver.implicitly_wait(30)
+    Changesetnumbers = driver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div/div[2]/div/div/div/div/table/tbody/a[1]/td[2]/div/div[2]/div/div[1]/span")
+    Name = driver.find_element(By.CLASS_NAME,"text-ellipsis  font-weight-semibold flex-grow")
+    Agent = driver.find_element(By.CLASS_NAME,"text-ellipsis")
+    Time = driver.find_element(By.CLASS_NAME,"bolt-time-item white-space-nowrap")
+    Changesetnumbers_list = []
+    for x in Changesetnumbers:
+        Changesetnumbers_list.append(Changesetnumbers[x].text)
 # Retrieves the name of the changeset
-     Name_list = []
-     for x in  Name:
-         Name_list.append(Name[x].text)
+    Name_list = []
+    for x in  Name:
+        Name_list.append(Name[x].text)
 # Retrieves the name of the agent that submitted the changeset
-     Agent_list = []
-     for x in  Agent:
-         Agent_list.append(Agent[x].text)
+    Agent_list = []
+    for x in  Agent:
+        Agent_list.append(Agent[x].text)
 # Retrieves the time the changeset was submitted 
-     Time_list = []
-     for x in  Time:
-         Time_list.append(Time[x].text)
- # Creates the dataframe
-     data_tuple = list(zip(Changesetnumbers_list[1:0],Name_list[1:0],Agent_list[1:0],Time_list[1:0]))
-     temp_pddf = pd.DataFrame(data_tuple, columns=["Change set", "Name", "Agent", "Time"])
-     df = df.append(temp_pddf)
-     return df, url1,     
+    Time_list = []
+    for x in  Time:
+        Time_list.append(Time[x].text)
+# Creates the dataframe
+    data_tuple = list(zip(Changesetnumbers_list[1:0],Name_list[1:0],Agent_list[1:0],Time_list[1:0]))
+    temp_pddf = pd.DataFrame(data_tuple, columns=["Change set", "Name", "Agent", "Time"])
+    df = df.append(temp_pddf)
+     
+ 
 
-
+    
 # Retrieves the actual changeset number
-def retrieve_changesets_fromwebsite2(url2,df1):
-    driver.get=url2
+def retrieve_changesets_fromwebsite2():
+    driver.get=Website2_var.get()
     #assert "Changeset" in driver.title
     driver.implicitly_wait(30)
     Changesetnumbers = driver.find_element(By.CLASS_NAME,"text-ellipsis monospaced-xs")
@@ -125,16 +108,16 @@ def retrieve_changesets_fromwebsite2(url2,df1):
     data_tuple = list(zip(Changesetnumbers_list[1:0],Name_list[1:0],Agent_list[1:0],Time_list[1:0]))
     temp_pddf = pd.DataFrame(data_tuple, columns=["Change set", "Name", "Agent", "Time"])
     df1 = df1.append(temp_pddf)
-    return df1, url2, 
+
 
 
 #Function to retrieve both changeset lists with the Tkinter button 
 def Both_retrieves():
-    retrieve_changesets_fromwebsite1(Website1_var, df)
-    retrieve_changesets_fromwebsite2(Website2_var, df1)
+    retrieve_changesets_fromwebsite1()
+    retrieve_changesets_fromwebsite2()
     df['Change Set'] = df1['Change Set']
     df["In Both Repos"] = np.where(df['Change Set'] == df1['Change Set'], 'True', 'False') #Create the comparison between the two repos
-
+    
 
 canvas = tk.Canvas(root, width=600, height=250)
 canvas.grid(columnspan=3)
